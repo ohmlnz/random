@@ -1,4 +1,5 @@
-/*	Design a system to keep track of employee data. The system should keep track of an employee’s name, 
+/*	
+*   Design a system to keep track of employee data. The system should keep track of an employee’s name, 
 *	ID number and hourly pay rate in a class called Employee. You may also store any additional data you 
 *	may need, hint, you need something extra. This data is stored in a file (user selectable) with the 
 *	id number, hourly pay rate, and the employee’s full name.
