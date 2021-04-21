@@ -6,251 +6,310 @@
 */
 
 #include <iostream>
-#include <fstream>
-#include <string>
+#include <vector>
 
 using namespace std;
 
-class Employee
-{
+class Money {
 public:
-	Employee(int newIdNumber = 0, double newHourlyPay = 0.0, string newName = "") :
-		idNumber(newIdNumber), hourlyPay(newHourlyPay), name(newName), wage(0.0) {}
-	friend ostream& operator<< (ostream& outs, const Employee& employee);
-	void incrementWage(int hours);
-private:
-	int idNumber;
-	double hourlyPay;
-	double wage;
-	string name;
+	// Constructor
+	Money(double dollars);
 
-	template<class T> friend class LList;
+	// Getters
+	double get_value() const;
+
+	// Setters
+	void set_value(double value);
+
+	// Operators
+	friend Money operator +(const Money& amount1, const Money& amount2);
+	friend Money operator -(const Money& amount1, const Money& amount2);
+	Money& operator +=(const Money& rhs);
+	Money& operator =(const Money& rhs);
+	friend istream& operator >>(istream& ins, Money& amount);
+	friend ostream& operator <<(ostream& outs, const Money& amount);
+private:
+	double dollarAmount;
 };
 
-ostream& operator<< (ostream& outs, const Employee& employee)
+Money::Money(double dollars = 0)
 {
-	outs << employee.name << ", " << "$" << employee.wage << endl;
-	return outs;
+	dollarAmount = dollars;
 }
 
-void Employee::incrementWage(int hours)
+double Money::get_value() const
 {
-	wage += hours * hourlyPay;
+	return dollarAmount;
 }
 
-template <class T>
-class LListNode
+void Money::set_value(double value)
 {
-public:
-	LListNode(T newdata = T(), LListNode<T>* newNext = nullptr) :
-		data(newdata), next(newNext) {}
-	LListNode<T>* getNextNode() const;
-	void setNextNode(LListNode<T>* newNext);
-	T& getData();
-private:
-	T data;
-	LListNode<T>* next;
-};
-
-template <class T>
-LListNode<T>* LListNode<T>::getNextNode() const
-{
-	return next;
+	dollarAmount = value;
 }
 
-template <class T>
-void LListNode<T>::setNextNode(LListNode<T>* newNext)
+Money operator +(const Money& amount1, const Money& amount2)
 {
-	next = newNext;
+	return amount1.dollarAmount + amount2.dollarAmount;
 }
 
-template <class T>
-T& LListNode<T>::getData()
+Money operator -(const Money& amount1, const Money& amount2)
 {
-	return data;
+	return amount1.dollarAmount - amount2.dollarAmount;
 }
 
-template <class T>
-class LList {
-public:
-	LList() : head(nullptr) {}
-	LList(const LList& rhs);
-	~LList();
-	LList<T>& operator=(const LList<T>& rhs);
-	LListNode<T>* findNode(int idNumber) const;
-	void readNodes() const;
-	void insertNode(LListNode<T>* newNode);
-	void sortNodesInDescendingOrder() const;
-	void clearNodes();
-	
-private:
-	LListNode<T>* head;
-	LListNode<T>* recursiveCopy(LListNode<T>* rhs);
-};
-
-template <class T>
-LList<T>::LList(const LList& rhs) : head(nullptr)
+Money& Money::operator +=(const Money& rhs)
 {
-	*this = rhs;
-}
-
-template <class T>
-LList<T>::~LList()
-{
-	clearNodes();
-}
-
-template <class T>
-LList<T>& LList<T>::operator=(const LList<T>& rhs) {
-	if (this == &rhs)
-		return *this;
-	clearNodes();
-	recursiveCopy(rhs);
+	this->dollarAmount += rhs.dollarAmount;
 	return *this;
 }
 
-template <class T>
-LListNode<T>* LList<T>::findNode(int idNumber) const
+Money& Money::operator =(const Money& rhs)
 {
-	LListNode<T>* node = head;
-	while (node->getNextNode() != nullptr && (node->getData()).idNumber != idNumber)
-	{
-		node = node->getNextNode();
-	}
-
-	if ((node->getData()).idNumber == idNumber)
-	{
-		return node;
-	}
-	else
-	{
-		return nullptr;
-	}
+	this->dollarAmount = rhs.dollarAmount;
+	return *this;
 }
 
-template <class T>
-void LList<T>::readNodes() const
+istream& operator >>(istream& ins, Money& amount)
 {
-	LListNode<T>* node = head;
-	while (node != nullptr)
-	{
-		cout << node->getData();
-		node = node->getNextNode();
-	}
+	ins >> amount.dollarAmount;
+	return ins;
 }
 
-template <class T>
-void LList<T>::insertNode(LListNode<T>* newNode)
+ostream& operator <<(ostream& outs, const Money& amount)
 {
-	newNode->setNextNode(head);
-	head = newNode;
+	outs << "$" << amount.dollarAmount;
+	return outs;
 }
 
-template <class T>
-void LList<T>::sortNodesInDescendingOrder() const
+class Check
 {
-	LListNode<T>* node = head;
-	LListNode<T>* temp;
-	Employee tempData;
+public:
+	// Constructor
+	Check(int identifiyingNumber, Money amount, bool hasBeenCashed);
 
-	while (node != nullptr)
-	{
-		temp = node;
-		while (temp->getNextNode() != nullptr)
-		{
-			if ((temp->getData()).wage < (temp->getNextNode()->getData()).wage)
-			{
-				tempData = temp->getData();
-				temp->getData() = temp->getNextNode()->getData();
-				temp->getNextNode()->getData() = tempData;
-			}
-			temp = temp->getNextNode();
-		}
-		node = node->getNextNode();
-	}
+	// Getters
+	double getCheckValue() const;
+	bool getCashedStatus() const;
+
+	// Setters
+	void cashCheck();
+
+	// Operators
+	friend ostream& operator <<(ostream& outs, const Check& check);
+	friend bool operator <(const Check& check1, const Check& check2);
+	Check& operator =(const Check& rhs);
+private:
+	int identifiyingNumber;
+	Money amount;
+	bool hasBeenCashed;
+};
+
+Check::Check(int checkIdNumber, Money checkAmount, bool checkStatus)
+{
+	identifiyingNumber = checkIdNumber;
+	amount = checkAmount;
+	hasBeenCashed = checkStatus;
 }
 
-template <class T>
-void LList<T>::clearNodes()
+double Check::getCheckValue() const
 {
-	LListNode<T>* node = head->getNextNode();
-	LListNode<T>* next;
-
-	while (node != nullptr)
-	{
-		next = node->getNextNode();
-		delete node;
-		node = next;
-	}
-
-	delete head;
-	head = nullptr;
+	return amount.get_value();
 }
 
-template <class T>
-LListNode<T>* LList<T>::recursiveCopy(LListNode<T>* rhs)
+void Check::cashCheck()
 {
-	if (rhs == nullptr)
-	{
-		return nullptr;
-	}
-	return new LListNode<T>(rhs->data, recursiveCopy(rhs->next));
+	hasBeenCashed = true;
 }
 
-void openInputFile(ifstream& ins, string label);
+bool Check::getCashedStatus() const
+{
+	return hasBeenCashed;
+}
+
+ostream& operator <<(ostream& outs, const Check& check)
+{
+	outs << "Check ID: " << check.identifiyingNumber << endl;
+	outs << "Check Amount: " << check.amount << endl;
+	outs << "Check Status: " << (check.hasBeenCashed ? "Processed" : "Unprocessed") << endl;
+	return outs;
+}
+
+bool operator <(const Check& check1, const Check& check2)
+{
+	return check1.amount.get_value() < check2.amount.get_value();
+}
+
+Check& Check::operator =(const Check& rhs)
+{
+	this->identifiyingNumber = rhs.identifiyingNumber;
+	this->amount = rhs.amount;
+	this->hasBeenCashed = rhs.hasBeenCashed;
+	return *this;
+}
+
+Money sumOfAllChecks(const vector <Check>& checks, bool hasBeenCashed);
+Money sumOfAllDepositedCash(const vector <double>& depositedCash);
+void printAllChecks(const vector <Check>& checks, bool hasBeenCashed);
+vector<Check> sortChecks(vector <Check>& checks);
+int findMinIndex(const vector <Check>& checks, int startIndex);
 
 int main()
 {
-	int idNumber;
-	int nbOfHours;
-	double hourlyPay;
-	string name;
-	ifstream employees;
-	ifstream payroll;
-	LList<Employee> employeesList;
+	int identifiyingNumber;
+	bool hasBeenCashed;
+	double amount = 0.0;
+	Money oldBalance;
+	Money currentBalance;
+	Money pendingBalance;
+	vector <Check> checks;
+	vector <double> depositedCash;
 
-	openInputFile(employees, "employee");
-	openInputFile(payroll, "payroll");
+	cout << "#####################################################" << endl;
+	cout << "###  Welcome to your checkbook balancing program  ###" << endl;
+	cout << "#####################################################" << endl << endl;
 
-	while (employees >> idNumber >> hourlyPay)
-	{
-		getline(employees >> ws, name);
-		Employee newEmployee(idNumber, hourlyPay, name);
-		LListNode<Employee>* node = new LListNode<Employee>(newEmployee);
-		employeesList.insertNode(node);
-	}
+	cout << "1. Old balance" << endl;
+	cout << "Please enter last month's balance: ";
 
-	while (payroll >> idNumber >> nbOfHours)
-	{		
-		if (employeesList.findNode(idNumber) != nullptr)
-		{
-			(employeesList.findNode(idNumber)->getData()).incrementWage(nbOfHours);
-		}
-	}
+	cin >> oldBalance;
+
+	cout << endl;
+	cout << "2. Record written checks" << endl;
+	cout << "Enter one check per line, including the following information: ";
+	cout << "ID number, amount, and cashed status (1 being cashed and 0 being not cashed)." << endl;
+	cout << "Enter -1 when you're done inputting checks." << endl << endl;
 	
-	cout << "*********Payroll Information********" << endl;
-	employeesList.sortNodesInDescendingOrder();
-	employeesList.readNodes();
-	cout << "*********End payroll**************" << endl;
+	while (true)
+	{
+		cin >> identifiyingNumber;
+
+		if (identifiyingNumber == -1)
+		{
+			break;
+		}
+
+		cin >> amount >> hasBeenCashed;
+
+		checks.push_back(Check(identifiyingNumber, Money(amount), hasBeenCashed));
+	}
+
+	cout << endl;
+	cout << "3. Deposit cash" << endl;
+	cout << "Please enter the amount you would like to deposit. ";
+	cout << "Each entry should be on a separate line" << endl;
+	cout << "Enter -1 when you're done inputting deposits." << endl << endl;
+
+	while (true)
+	{
+		cin >> amount;
+
+		if (amount == -1)
+		{
+			break;
+		}
+
+		depositedCash.push_back(amount);
+	}
+
+	cout << endl;
+	cout << "4. Current balance" << endl;
+	cout << "The current balance is: ";
+	currentBalance = (Money(oldBalance) + sumOfAllDepositedCash(depositedCash)) - sumOfAllChecks(checks, true);
+	cout << currentBalance;
+
+	cout << endl << endl;
+	cout << "5. Cashed checks total" << endl;
+	cout << "The sum of all cashed checks is: ";
+	cout << sumOfAllChecks(checks, true);
+
+	cout << endl << endl;
+	cout << "6. Deposited cash total" << endl;
+	cout << "The sum of all deposited cash is: ";
+	cout << sumOfAllDepositedCash(depositedCash);
+
+	cout << endl << endl;
+	cout << "7. Pending Balance" << endl;
+	cout << "The pending balance (actual balance - outstanding checks) is: ";
+	pendingBalance = currentBalance - sumOfAllChecks(checks, false);
+	cout << pendingBalance << endl;
+	cout << "Difference with actual balance: " << pendingBalance - currentBalance << endl;
+
+	cout << endl << endl;
+	cout << "8. List of cashed checks" << endl;
+	printAllChecks(sortChecks(checks), true);
+
+	cout << endl << endl;
+	cout << "9. List of uncashed checks" << endl;
+	printAllChecks(sortChecks(checks), false);
+
+	cout << endl;
 	return 0;
 }
 
-void openInputFile(ifstream& inFile, string label)
+Money sumOfAllChecks(const vector <Check>& checks, bool hasBeenCashed)
 {
-	string filename;
-	cout << "Which " << label << " file would you like to open?" << endl;
-	cin >> filename;
-	cout << endl;
+	Money amount;
 
-	inFile.open(filename);
-
-	while (!inFile)
+	for (auto const& check : checks)
 	{
-		cout << "Incorrect file name!" << endl;
-		cout << "Which " << label << " file would you like to open?" << endl;
-		cin >> filename;
-		cout << endl;
-		inFile.clear();
-		inFile.open(filename);
+		if (check.getCashedStatus() == hasBeenCashed)
+		{
+			amount += check.getCheckValue();
+		}
 	}
+
+	return amount;
+}
+
+Money sumOfAllDepositedCash(const vector <double>& depositedCash)
+{
+	Money amount;
+	for (auto const& cash : depositedCash)
+	{
+		amount += cash;
+	}
+	return amount;
+}
+
+void printAllChecks(const vector <Check>& checks, bool hasBeenCashed)
+{
+	for (auto const& check : checks)
+	{
+		if (check.getCashedStatus() == hasBeenCashed)
+		{
+			cout << check;
+		}
+	}
+
+	if (checks.size() == 0)
+	{
+		cout << "There are currently no checks to print." << endl;
+	}
+}
+
+vector<Check> sortChecks(vector <Check>& checks)
+{
+	for (int index = 0; index < checks.size(); index++)
+	{
+		int minIndex = findMinIndex(checks, index);
+		Check oldCheck = checks[index];
+		Check minCheck = checks[minIndex];
+		checks[index] = minCheck;
+		checks[minIndex] = oldCheck;
+	}
+	return checks;
+}
+
+int findMinIndex(const vector <Check>& checks, int startIndex)
+{
+	int minIndex = startIndex;
+
+	for (int i = startIndex; i < checks.size(); i++)
+	{
+		if (checks[i] < checks[minIndex])
+		{
+			minIndex = i;
+		}
+	}
+	return minIndex;
 }
